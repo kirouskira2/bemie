@@ -71,10 +71,10 @@ type Circle = {
 
 export const Particles: React.FC<ParticlesProps> = ({
   className = '',
-  quantity = 80,
+  quantity = 150,
   staticity = 50,
-  ease = 50,
-  size = 0.5,
+  ease = 80,
+  size = 0.4,
   refresh = false,
   color = '#ffffff',
   vx = 0,
@@ -91,6 +91,9 @@ export const Particles: React.FC<ParticlesProps> = ({
   const dpr = typeof window !== 'undefined' ? window.devicePixelRatio || 1 : 1;
   const rafID = useRef<number | null>(null);
   const resizeTimeout = useRef<number | null>(null);
+  const initCanvasRef = useRef<() => void>(() => {});
+  const onMouseMoveRef = useRef<() => void>(() => {});
+  const animateRef = useRef<() => void>(() => {});
 
   const rgb = hexToRgb(color);
 
@@ -188,19 +191,47 @@ export const Particles: React.FC<ParticlesProps> = ({
     }
   };
 
+  const remapValue = (
+    value: number,
+    start1: number,
+    end1: number,
+    start2: number,
+    end2: number
+  ): number => {
+    const remapped =
+      ((value - start1) * (end2 - start2)) / (end1 - start1) + start2;
+    return remapped > 0 ? remapped : 0;
+  };
+
   const animate = () => {
     clearContext();
     circles.current.forEach((circle: Circle, i: number) => {
-      circle.alpha += 0.02;
-      if (circle.alpha > circle.targetAlpha) {
-        circle.alpha = circle.targetAlpha;
+      const edge = [
+        circle.x + circle.translateX - circle.size,
+        canvasSize.current.w - circle.x - circle.translateX - circle.size,
+        circle.y + circle.translateY - circle.size,
+        canvasSize.current.h - circle.y - circle.translateY - circle.size,
+      ];
+      const closestEdge = edge.reduce((a, b) => Math.min(a, b));
+      const remapClosestEdge = parseFloat(
+        remapValue(closestEdge, 0, 20, 0, 1).toFixed(2)
+      );
+      if (remapClosestEdge > 1) {
+        circle.alpha += 0.02;
+        if (circle.alpha > circle.targetAlpha) {
+          circle.alpha = circle.targetAlpha;
+        }
+      } else {
+        circle.alpha = circle.targetAlpha * remapClosestEdge;
       }
       circle.x += circle.dx + vx;
       circle.y += circle.dy + vy;
       circle.translateX +=
-        (mouse.current.x / (staticity / circle.magnetism) - circle.translateX) / ease;
+        (mouse.current.x / (staticity / circle.magnetism) - circle.translateX) /
+        ease;
       circle.translateY +=
-        (mouse.current.y / (staticity / circle.magnetism) - circle.translateY) / ease;
+        (mouse.current.y / (staticity / circle.magnetism) - circle.translateY) /
+        ease;
 
       drawCircle(circle, true);
 
@@ -215,22 +246,26 @@ export const Particles: React.FC<ParticlesProps> = ({
         drawCircle(newCircle);
       }
     });
-    rafID.current = window.requestAnimationFrame(animate);
+    rafID.current = window.requestAnimationFrame(animateRef.current);
   };
+
+  initCanvasRef.current = initCanvas;
+  onMouseMoveRef.current = onMouseMove;
+  animateRef.current = animate;
 
   useEffect(() => {
     if (canvasRef.current) {
       context.current = canvasRef.current.getContext('2d');
     }
-    initCanvas();
-    animate();
+    initCanvasRef.current();
+    animateRef.current();
 
     const handleResize = () => {
       if (resizeTimeout.current) {
-        window.clearTimeout(resizeTimeout.current);
+        clearTimeout(resizeTimeout.current);
       }
       resizeTimeout.current = window.setTimeout(() => {
-        initCanvas();
+        initCanvasRef.current();
       }, 200);
     };
 
@@ -248,11 +283,11 @@ export const Particles: React.FC<ParticlesProps> = ({
   }, [color]);
 
   useEffect(() => {
-    onMouseMove();
+    onMouseMoveRef.current();
   }, [mousePosition.x, mousePosition.y]);
 
   useEffect(() => {
-    initCanvas();
+    initCanvasRef.current();
   }, [refresh]);
 
   return (

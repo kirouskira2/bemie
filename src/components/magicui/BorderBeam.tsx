@@ -1,52 +1,70 @@
-import React from 'react';
+import { motion, type MotionStyle, type Transition } from 'motion/react';
 import { cn } from '../../lib/utils';
 
 interface BorderBeamProps {
-  className?: string;
   size?: number;
   duration?: number;
-  borderWidth?: number;
+  delay?: number;
   colorFrom?: string;
   colorTo?: string;
-  delay?: number;
+  transition?: Transition;
+  className?: string;
+  style?: React.CSSProperties;
+  reverse?: boolean;
+  initialOffset?: number;
+  borderWidth?: number;
 }
 
-export const BorderBeam: React.FC<BorderBeamProps> = ({
+export const BorderBeam = ({
   className,
-  size = 220,
-  duration = 8,
-  borderWidth = 1.5,
+  size = 50,
+  delay = 0,
+  duration = 6,
   colorFrom = '#ffaa40',
   colorTo = '#9c40ff',
-  delay = 0,
-}) => {
+  transition,
+  style,
+  reverse = false,
+  initialOffset = 0,
+  borderWidth = 1,
+}: BorderBeamProps) => {
   return (
     <div
+      className="pointer-events-none absolute inset-0 rounded-[inherit] border-(length:--border-beam-width) border-transparent mask-[linear-gradient(transparent,transparent),linear-gradient(#000,#000)] mask-intersect [mask-clip:padding-box,border-box]"
       style={
         {
-          '--size': `${size}px`,
-          '--duration': `${duration}s`,
-          '--border-width': `${borderWidth}px`,
-          '--color-from': colorFrom,
-          '--color-to': colorTo,
-          '--delay': `-${delay}s`,
+          '--border-beam-width': `${borderWidth}px`,
         } as React.CSSProperties
       }
-      className={cn(
-        'pointer-events-none absolute inset-0 rounded-[inherit] overflow-hidden',
-        className
-      )}
     >
-      <div
-        className="absolute -inset-[100%] m-auto aspect-square animate-spin [background:conic-gradient(from_0deg,transparent_0_300deg,var(--color-from)_330deg,var(--color-to)_360deg)] opacity-80"
-        style={{
-          width: '250%',
-          height: '250%',
-          animationDuration: `${duration}s`,
+      <motion.div
+        className={cn(
+          'absolute aspect-square border-beam-gradient',
+          className
+        )}
+        style={
+          {
+            width: size,
+            offsetPath: `rect(0 auto auto 0 round ${size}px)`,
+            '--color-from': colorFrom,
+            '--color-to': colorTo,
+            ...style,
+          } as MotionStyle
+        }
+        initial={{ offsetDistance: `${initialOffset}%` }}
+        animate={{
+          offsetDistance: reverse
+            ? [`${100 - initialOffset}%`, `${-initialOffset}%`]
+            : [`${initialOffset}%`, `${100 + initialOffset}%`],
+        }}
+        transition={{
+          repeat: Infinity,
+          ease: 'linear',
+          duration,
+          delay: -delay,
+          ...transition,
         }}
       />
-      {/* Moldura interna que preserva apenas a linha da borda */}
-      <div className="absolute inset-[1.5px] rounded-[calc(1.5rem-1.5px)] bg-zinc-900/90 backdrop-blur-xl" />
     </div>
   );
 };
