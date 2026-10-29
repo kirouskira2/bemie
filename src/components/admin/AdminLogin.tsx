@@ -35,13 +35,15 @@ export function AdminLogin({ onLoginSuccess, onBackToStore }: AdminLoginProps) {
     }
   };
 
-  const handleDemoAccess = () => {
+  const handleSolicitarAcesso = (e: React.MouseEvent) => {
+    e.preventDefault();
+    // Acesso demonstrativo / VIP liberado
     onLoginSuccess();
   };
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-white flex flex-col justify-center items-center px-4 relative overflow-hidden font-sans">
-      {/* 1. Fundo radial idêntico ao Aura */}
+    <div className="min-h-screen bg-zinc-950 text-white flex flex-col justify-center items-center px-4 relative overflow-hidden font-sans select-none">
+      {/* 1. Fundo radial escuro idêntico ao print */}
       <div className="absolute inset-0 z-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-zinc-900 via-black to-black" />
 
       {/* 2. Particles oficial Magic UI */}
@@ -53,8 +55,20 @@ export function AdminLogin({ onLoginSuccess, onBackToStore }: AdminLoginProps) {
         refresh={true}
       />
 
+      {/* Botão sutil discreto no topo para voltar à loja */}
+      <button
+        type="button"
+        onClick={onBackToStore}
+        title="Voltar para o catálogo"
+        className="absolute top-6 left-6 z-20 text-xs text-zinc-600 hover:text-zinc-300 transition-colors cursor-pointer flex items-center gap-1.5"
+      >
+        <span>←</span>
+        <span>Voltar à loja</span>
+      </button>
+
       {/* 3. Card Container */}
       <div className="relative z-10 w-full max-w-md">
+        {/* Cabeçalho exatamente como no print */}
         <div className="text-center mb-10">
           <a
             href="/"
@@ -62,11 +76,11 @@ export function AdminLogin({ onLoginSuccess, onBackToStore }: AdminLoginProps) {
               e.preventDefault();
               onBackToStore();
             }}
-            className="text-4xl font-bold tracking-tighter text-white inline-block mb-4"
+            className="text-4xl font-bold tracking-tighter text-white inline-block mb-4 hover:opacity-90 transition-opacity cursor-pointer"
           >
             AURA.
           </a>
-          <h1 className="text-2xl font-medium tracking-tight">Portal Exclusivo</h1>
+          <h1 className="text-2xl font-medium tracking-tight text-white">Portal Exclusivo</h1>
           <p className="text-zinc-500 mt-2 text-sm">
             Acesse o portfólio restrito e oportunidades off-market.
           </p>
@@ -82,7 +96,7 @@ export function AdminLogin({ onLoginSuccess, onBackToStore }: AdminLoginProps) {
                 className="text-xs font-semibold uppercase tracking-widest text-zinc-500 mb-2 block"
                 htmlFor="email"
               >
-                E-mail
+                E-MAIL
               </label>
               <input
                 id="email"
@@ -91,7 +105,7 @@ export function AdminLogin({ onLoginSuccess, onBackToStore }: AdminLoginProps) {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-1 focus:ring-white/30 transition-all"
+                className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-1 focus:ring-white/30 transition-all text-sm"
                 placeholder="vip@exemplo.com"
               />
             </div>
@@ -102,7 +116,7 @@ export function AdminLogin({ onLoginSuccess, onBackToStore }: AdminLoginProps) {
                   className="text-xs font-semibold uppercase tracking-widest text-zinc-500 block"
                   htmlFor="password"
                 >
-                  Senha
+                  SENHA
                 </label>
                 <a
                   href="#forgot"
@@ -110,7 +124,7 @@ export function AdminLogin({ onLoginSuccess, onBackToStore }: AdminLoginProps) {
                     e.preventDefault();
                     alert('Entre em contato com o suporte para redefinir sua senha.');
                   }}
-                  className="text-xs text-zinc-500 hover:text-white transition-colors"
+                  className="text-xs text-zinc-500 hover:text-white transition-colors cursor-pointer"
                 >
                   Esqueceu?
                 </a>
@@ -122,8 +136,8 @@ export function AdminLogin({ onLoginSuccess, onBackToStore }: AdminLoginProps) {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-1 focus:ring-white/30 transition-all"
-                placeholder="        "
+                className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-1 focus:ring-white/30 transition-all text-sm"
+                placeholder="••••••••"
               />
             </div>
 
@@ -145,20 +159,10 @@ export function AdminLogin({ onLoginSuccess, onBackToStore }: AdminLoginProps) {
               Ainda não é um cliente VIP?{' '}
               <button
                 type="button"
-                onClick={handleDemoAccess}
-                className="text-white hover:underline cursor-pointer"
+                onClick={handleSolicitarAcesso}
+                className="text-white font-medium hover:underline cursor-pointer"
               >
-                Solicite seu acesso (Demo)
-              </button>
-            </p>
-
-            <p className="text-center text-xs text-zinc-500 mt-1">
-              <button
-                type="button"
-                onClick={onBackToStore}
-                className="text-zinc-500 hover:text-white transition-colors cursor-pointer"
-              >
-                ← Voltar para a loja
+                Solicite seu acesso
               </button>
             </p>
           </form>
