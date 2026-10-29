@@ -15,6 +15,7 @@ import { CartDrawer, CartItem } from './components/CartDrawer';
 import { SiteFrames } from './components/SiteFrames';
 import { SiteHero } from './components/SiteHero';
 import { TrustMarquee } from './components/TrustMarquee';
+import { AdminApp } from './components/admin/AdminApp';
 import {
   PRELOADER_COUNTS,
   BEMIE_PRODUCTS,
@@ -44,7 +45,7 @@ function loadSavedCart(): CartItem[] {
   }
 }
 
-function HomePage() {
+function HomePage({ onNavigateToAdmin }: { onNavigateToAdmin?: () => void }) {
   const skipIntro =
     typeof window !== 'undefined' &&
     new URLSearchParams(window.location.search).get('autostart') === '1';
@@ -274,6 +275,10 @@ function HomePage() {
 
   const handleNavigate = useCallback(
     (route: string) => {
+      if (route === 'admin' || route === '#admin') {
+        onNavigateToAdmin?.();
+        return;
+      }
       const selector = resolveRouteTargetSelector(route);
       if (selector === '.site-hero') {
         (window as unknown as { __bemieNavigating?: boolean }).__bemieNavigating = false;
@@ -449,9 +454,56 @@ function HomePage() {
 }
 
 export default function App() {
+  const [currentView, setCurrentView] = useState<'store' | 'admin'>(() => {
+    if (typeof window !== 'undefined') {
+      const isHashAdmin = window.location.hash === '#admin';
+      const isPathAdmin = window.location.pathname.startsWith('/admin');
+      const isQueryAdmin = new URLSearchParams(window.location.search).get('view') === 'admin';
+      return isHashAdmin || isPathAdmin || isQueryAdmin ? 'admin' : 'store';
+    }
+    return 'store';
+  });
+
+  useEffect(() => {
+    const handleHashChange = () => {
+      const isHashAdmin = window.location.hash === '#admin';
+      const isPathAdmin = window.location.pathname.startsWith('/admin');
+      const isQueryAdmin = new URLSearchParams(window.location.search).get('view') === 'admin';
+      setCurrentView(isHashAdmin || isPathAdmin || isQueryAdmin ? 'admin' : 'store');
+    };
+
+    window.addEventListener('hashchange', handleHashChange);
+    window.addEventListener('popstate', handleHashChange);
+    return () => {
+      window.removeEventListener('hashchange', handleHashChange);
+      window.removeEventListener('popstate', handleHashChange);
+    };
+  }, []);
+
+  const navigateToStore = () => {
+    if (typeof window !== 'undefined') {
+      window.location.hash = '';
+      if (window.location.pathname.startsWith('/admin')) {
+        window.history.pushState(null, '', '/');
+      }
+    }
+    setCurrentView('store');
+  };
+
+  const navigateToAdmin = () => {
+    if (typeof window !== 'undefined') {
+      window.location.hash = '#admin';
+    }
+    setCurrentView('admin');
+  };
+
+  if (currentView === 'admin') {
+    return <AdminApp onBackToStore={navigateToStore} />;
+  }
+
   return (
     <ReactLenis root>
-      <HomePage />
+      <HomePage onNavigateToAdmin={navigateToAdmin} />
     </ReactLenis>
   );
 }

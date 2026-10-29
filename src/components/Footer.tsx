@@ -120,6 +120,15 @@ export const Footer = React.memo(function Footer({ onNavigate, onOpenCart }: Foo
             Atendimento oficial via WhatsApp {STORE_CONFIG.whatsappDisplay} · Entrega garantida em{' '}
             {STORE_CONFIG.previsaoEntrega}
           </p>
+          <p className="mt-2 text-[11px] text-[#A8A29E]">
+            <button
+              type="button"
+              onClick={() => onNavigate?.('admin')}
+              className="hover:text-[#1C1917] transition-colors underline cursor-pointer"
+            >
+              Área de Gestão / Painel Admin
+            </button>
+          </p>
         </div>
       </div>
     </footer>
