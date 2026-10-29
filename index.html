@@ -27,8 +27,16 @@
     <link rel="icon" type="image/jpeg" href="/logos/bemie-brand-logo.jpg" sizes="32x32" />
     <!-- Apple touch icon: logo quadrado com fundo para iOS -->
     <link rel="apple-touch-icon" href="/logos/bemie-brand-logo.jpg" />
-    <!-- Preload da imagem hero (LCP) para carregamento mais rápido -->
-    <link rel="preload" as="image" href="/assets/capa.jfif" fetchpriority="high" />
+    <!-- Script de desregistro de Service Workers residuais para eliminar no-op fetch handler -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then(function (registrations) {
+          for (var i = 0; i < registrations.length; i++) {
+            registrations[i].unregister();
+          }
+        });
+      }
+    </script>
     <!-- Preconnect para fontes Google -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
